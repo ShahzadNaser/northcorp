@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include northcorp *.css
+recursive-include northcorp *.csv
+recursive-include northcorp *.html
+recursive-include northcorp *.ico
+recursive-include northcorp *.js
+recursive-include northcorp *.json
+recursive-include northcorp *.md
+recursive-include northcorp *.png
+recursive-include northcorp *.py
+recursive-include northcorp *.svg
+recursive-include northcorp *.txt
+recursive-exclude northcorp *.pyc
