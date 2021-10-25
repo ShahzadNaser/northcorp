@@ -173,3 +173,33 @@ user_data_fields = [
 # 	"northcorp.auth.validate"
 # ]
 
+
+doctypes_list = ["Purchase Order", "Supplier"]
+
+fixtures = [
+    {"doctype": "Client Script", "filters": [
+        [
+            "dt", "in", doctypes_list
+        ]
+    ]},
+    {"doctype": "Property Setter", "filters": [
+        [
+            "doc_type", "in", doctypes_list
+        ]
+    ]},
+    {"doctype": "Custom Field", "filters": [
+        [
+            "dt", "in", doctypes_list
+        ]
+    ]}
+]
+
+# from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
+# from outso.modules.hr.salary_slip.salary_slip import get_data_for_eval
+
+# SalarySlip.get_data_for_eval = get_data_for_eval
+
+
+override_whitelisted_methods = {}
+
+doc_events = {}
