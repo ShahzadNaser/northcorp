@@ -174,7 +174,7 @@ user_data_fields = [
 # ]
 
 
-doctypes_list = ["Purchase Order", "Supplier"]
+doctypes_list = ["Purchase Order", "Supplier", "Project"]
 
 fixtures = [
     {"doctype": "Client Script", "filters": [
@@ -195,11 +195,13 @@ fixtures = [
 ]
 
 # from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
-# from outso.modules.hr.salary_slip.salary_slip import get_data_for_eval
+# from northcorp.modules.project import set_project_status
 
 # SalarySlip.get_data_for_eval = get_data_for_eval
 
 
-override_whitelisted_methods = {}
+override_whitelisted_methods = {
+	'erpnext.projects.doctype.project.project.set_project_status' : 'northcorp.modules.project.set_project_status'
+}
 
 doc_events = {}
