@@ -4,12 +4,38 @@
   "doctype": "Client Script",
   "dt": "Purchase Order",
   "enabled": 1,
-  "modified": "2021-06-21 11:37:38.632889",
+  "modified": "2021-10-26 20:45:39.881577",
   "name": "Purchase Order-Client",
   "parent": null,
   "parentfield": null,
   "parenttype": null,
-  "script": "frappe.ui.form.on('Purchase Order', {\nschedule_date:function(frm,cdt,cdn)\n\t{\n\t  var d= locals[cdt][cdn]\n\t  if(d.tax_category=='UAE VAT 5% Standard')\n\t  {\n\t       frm.set_value(\"taxes_and_charges\", \"UAE VAT 5% - NC\");  \n\t  }\n\t  if(d.tax_category=='RCM \u2013 5% VAT')\n\t  {\n\t       frm.set_value(\"taxes_and_charges\", \"RCM \u2013 5% VAT - NC\");\n\t       frm.set_value(\"reverse_charge\", \"Y\");  \n\t  }\n\t},\n\tvalidate:function(frm) {\n        $.each(frm.doc.items || [], function(i, v) {\n       frappe.model.set_value(v.doctype, v.name,\"project\",frm.doc.project)\n    });\n\t},\n\tvalidate:function(frm){\n\t   frappe.call({\n                    method: 'frappe.client.get_value',\n                    args: {\n                        'doctype': 'Project',\n                        'filters': {'name': frm.doc.project},\n                        'fieldname': [\n                            'project_manager'\n                        ]\n                    },\n                    callback: function(s) {\n                        if (!s.exc) {\n                           frm.set_value(\"project_manager\", s.message.project_manager);\n                           \n                        }\n                    }\n\t   })\n\t   \n\t},\n\tcost_center:function(frm,cdt,cdn)\n\t{\n\t    var d=locals[cdt][cdn]\n\t    frm.set_value(\"department\",d.cost_center ); \n\t}\n})\n",
+  "script": "$.extend(cur_frm.cscript, new erpnext.buying.PurchaseOrderController({frm: cur_frm}));\n\n\nfrappe.ui.form.on('Purchase Order', {\n    refresh(frm){\n  \t\tfrm.set_query('projects', function () {\n  \t\t    return {\n\t\t\t\tfilters: {\n\t\t\t\t\t\"status\": [\"IN\", [\"Open\", \"Defect Liability Period\"]]\n\t\t\t\t}\n\t\t\t    \n\t\t\t}\n  \t\t});\n    },\n    schedule_date:function(frm,cdt,cdn){\n        var d= locals[cdt][cdn]\n        if(d.tax_category=='UAE VAT 5% Standard'){\n           frm.set_value(\"taxes_and_charges\", \"UAE VAT 5% - NC\");  \n        }\n\n        if(d.tax_category=='RCM \u2013 5% VAT'){\n           frm.set_value(\"taxes_and_charges\", \"RCM \u2013 5% VAT - NC\");\n           frm.set_value(\"reverse_charge\", \"Y\");  \n        }\n\t},\n\tvalidate:function(frm) {\n        $.each(frm.doc.items || [], function(i, v) {\n       frappe.model.set_value(v.doctype, v.name,\"project\",frm.doc.project)\n    });\n\t},\n\tvalidate:function(frm){\n\t   frappe.call({\n                    method: 'frappe.client.get_value',\n                    args: {\n                        'doctype': 'Project',\n                        'filters': {'name': frm.doc.project},\n                        'fieldname': [\n                            'project_manager'\n                        ]\n                    },\n                    callback: function(s) {\n                        if (!s.exc) {\n                           frm.set_value(\"project_manager\", s.message.project_manager);\n                           \n                        }\n                    }\n\t   })\n\t   \n\t},\n\tcost_center:function(frm,cdt,cdn)\n\t{\n\t    var d=locals[cdt][cdn]\n\t    frm.set_value(\"department\",d.cost_center ); \n\t}\n})\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Supplier",
+  "enabled": 1,
+  "modified": "2021-10-25 21:03:24.380710",
+  "name": "Supplier-Form",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "script": "frappe.ui.form.on('Supplier', {\n\trefresh(frm) {\n\t\tfrm.set_query('state', function () {\n  \t\t    return {\n\t\t\t\tfilters: {\n\t\t\t\t\t\"country\": frm.doc.country\n\t\t\t\t}\n\t\t\t    \n\t\t\t}\n  \t\t});\n\t}\n})",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Project",
+  "enabled": 1,
+  "modified": "2021-10-26 20:40:13.465691",
+  "name": "Project-Form",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "script": "frappe.ui.form.on('Project', {\n\trefresh(frm) {\n\t\tif (!frm.is_new()) {\n\t\t    frm.add_custom_button(__('Defect Liability Period'), () => {\n\t\t\t\tfrm.events.set_status(frm, 'Defect Liability Period');\n\t\t\t}, __('Set Status'));\n\t\t}\n\t}\n})",
   "view": "Form"
  }
 ]
