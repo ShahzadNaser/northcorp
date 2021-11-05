@@ -69,6 +69,40 @@
  },
  {
   "default_value": null,
+  "doc_type": "Purchase Order Item",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "schedule_date",
+  "modified": "2021-04-13 12:44:14.700757",
+  "name": "Purchase Order Item-schedule_date-in_list_view",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "property": "in_list_view",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Purchase Order Item",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "uom",
+  "modified": "2021-04-13 12:44:54.254493",
+  "name": "Purchase Order Item-uom-in_list_view",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "property": "in_list_view",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
+ },
+ {
+  "default_value": null,
   "doc_type": "Purchase Order",
   "docstatus": 0,
   "doctype": "Property Setter",
@@ -83,6 +117,23 @@
   "property_type": "Data",
   "row_name": null,
   "value": "Purchase Order"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Purchase Order Item",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "amount",
+  "modified": "2021-04-19 08:15:52.568290",
+  "name": "Purchase Order Item-amount-label",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "property": "label",
+  "property_type": "Data",
+  "row_name": null,
+  "value": "Amount without Tax"
  },
  {
   "default_value": null,
@@ -321,5 +372,22 @@
   "property_type": "Text",
   "row_name": null,
   "value": "Open\nCompleted\nDefect Liability Period\nCancelled"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Purchase Order Item",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "warehouse",
+  "modified": "2021-11-05 19:15:46.313257",
+  "name": "Purchase Order Item-warehouse-in_list_view",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "property": "in_list_view",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
  }
 ]
