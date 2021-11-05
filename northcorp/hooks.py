@@ -174,7 +174,7 @@ user_data_fields = [
 # ]
 
 
-doctypes_list = ["Purchase Order", "Supplier", "Project", "Request for Quotation"]
+doctypes_list = ["Purchase Order", "Purchase Order Item", "Supplier", "Project", "Request for Quotation"]
 
 fixtures = [
     {"doctype": "Client Script", "filters": [
