@@ -1,0 +1,187 @@
+{
+ "actions": [],
+ "autoname": "PT.-.YY.-.MM.-.#####",
+ "creation": "2022-01-13 22:53:37.055796",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "start_date",
+  "column_break_2",
+  "end_date",
+  "filters_section",
+  "department",
+  "branch",
+  "designation",
+  "employee_grade",
+  "column_break_9",
+  "employee_inclusion",
+  "employee_exclusion",
+  "default_project",
+  "get_employees",
+  "amended_from",
+  "employees_list_section",
+  "employees"
+ ],
+ "fields": [
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "End Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee_inclusion",
+   "fieldtype": "Table MultiSelect",
+   "label": "Employee Inclusion",
+   "options": "Employees"
+  },
+  {
+   "fieldname": "employee_exclusion",
+   "fieldtype": "Table MultiSelect",
+   "label": "Employee Exclusion",
+   "options": "Employees"
+  },
+  {
+   "fieldname": "get_employees",
+   "fieldtype": "Button",
+   "label": "Get Employees"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Project Wise Timesheet",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "employees_list_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "default_project",
+   "fieldtype": "Link",
+   "label": "Default Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "employees",
+   "fieldtype": "Table",
+   "label": "Employee Timesheet",
+   "options": "Employee Timesheet"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-01-13 23:17:40.260745",
+ "modified_by": "Administrator",
+ "module": "northcorp",
+ "name": "Project Wise Timesheet",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
