@@ -1,12 +1,31 @@
 # Copyright (c) 2022, Shahzad Naser and contributors
 # For license information, please see license.txt
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from datetime import timedelta, date
 
 class ProjectWiseTimesheet(Document):
+	def validate(self):
+		if frappe.utils.getdate(self.start_date) > frappe.utils.getdate(self.end_date):
+			frappe.throw("From Date cannot be greater than End Date.")
+
+		if frappe.utils.getdate(self.end_date) > frappe.utils.getdate(frappe.utils.nowdate()):
+			frappe.throw("End Date cannot be greater than {}".format(frappe.utils.nowdate()))
+
+		self.validate_duplicate_date_rows()
+
+	def validate_duplicate_date_rows(self):
+		temp_dict = {}
+		for row in self.employees:
+			if row.employee not in temp_dict:
+				temp_dict[row.employee] = [row.attendance_date]
+			else:
+				if row.attendance_date in temp_dict[row.employee]:
+					frappe.throw("There are duplicate Attendance of Employee {0} on Date {1}".format(row.employee, row.attendance_date))
+				else:
+					temp_dict[row.employee].append(row.attendance_date)
+					
 	@frappe.whitelist()
 	def fill_employees(self):
 		self.set('employees', [])
@@ -18,11 +37,11 @@ class ProjectWiseTimesheet(Document):
 
 		for d in employees:
 			for single_date in daterange(frappe.utils.getdate(self.start_date), frappe.utils.getdate(self.end_date)):
-				self.append('employees', {"employee":d.employee,"attendance_date":frappe.utils.getdate(single_date),"project":self.default_project or ''})
+				self.append('employees', {"employee":d.employee,"attendance_date":frappe.utils.getdate(single_date),"project":self.default_project or '',"start_time": '',"end_time":''})
 
 		self.number_of_employees = len(self.employees)
 
-	def before_save(self):
+	def before_submit(self):
 		if self.employees:
 			for emp in self.employees:
 				if not emp.working_hours and (not emp.start_time or not emp.end_time):
@@ -72,7 +91,7 @@ def get_employee_ids(employees):
 
 
 def daterange(start_date, end_date):
-    for n in range(int ((end_date - start_date).days)):
+    for n in range(int((end_date - start_date).days)+1):
         yield start_date + timedelta(n)
         
 
