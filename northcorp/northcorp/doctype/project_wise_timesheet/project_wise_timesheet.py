@@ -48,6 +48,14 @@ class ProjectWiseTimesheet(Document):
 					frappe.throw(_("Working Hours or Start Time and End Time required in Employee Timesheet for Employee {}".format(emp.employee)))
 				if emp.start_time and emp.end_time:
 					emp.working_hours = frappe.utils.time_diff_in_hours(emp.end_time,emp.start_time)
+
+				if emp.working_hours <= 0:
+					frappe.throw(_("Working Hours cannot be Zero in Employee Timesheet for Employee {}".format(emp.employee)))
+
+				if not emp.project:
+					frappe.throw(_("There is not Project selected in Employee Timesheet for Employee {}".format(emp.employee)))
+
+
 		else:
 			frappe.throw("There must be atlease one entry in Employee Timesheet")
 					
