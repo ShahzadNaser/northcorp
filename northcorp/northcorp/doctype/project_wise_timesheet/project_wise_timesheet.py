@@ -48,6 +48,8 @@ class ProjectWiseTimesheet(Document):
 					frappe.throw(_("Working Hours or Start Time and End Time required in Employee Timesheet for Employee {}".format(emp.employee)))
 				if emp.start_time and emp.end_time:
 					emp.working_hours = frappe.utils.time_diff_in_hours(emp.end_time,emp.start_time)
+		else:
+			frappe.throw("There must be atlease one entry in Employee Timesheet")
 					
 	def on_submit(self):
 		frappe.enqueue(mark_attendance,timeout=6000,is_async=True,now=True,self=self)		
