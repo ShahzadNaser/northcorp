@@ -3,6 +3,15 @@
 
 frappe.ui.form.on('Project Wise Timesheet', {
 	refresh: function(frm) {
+		frm.set_query('default_project', function () {
+			return {
+			  filters: {
+				  "status": ["IN", ["Open", "Defect Liability Period"]]
+			  }
+			  
+		  }
+		});
+  
 	},
 	get_employees: function (frm) {
 		return frappe.call({
