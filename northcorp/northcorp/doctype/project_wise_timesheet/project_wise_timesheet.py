@@ -13,7 +13,7 @@ class ProjectWiseTimesheet(Document):
 		if frappe.utils.getdate(self.end_date) > frappe.utils.getdate(frappe.utils.nowdate()):
 			frappe.throw("End Date cannot be greater than {}".format(frappe.utils.nowdate()))
 
-		self.validate_duplicate_date_rows()
+		# self.validate_duplicate_date_rows()
 
 	def validate_duplicate_date_rows(self):
 		temp_dict = {}
