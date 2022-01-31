@@ -89,13 +89,11 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Attendance":{
+		"before_submit":"northcorp.modules.attendance.before_submit",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -203,5 +201,3 @@ fixtures = [
 override_whitelisted_methods = {
 	'erpnext.projects.doctype.project.project.set_project_status' : 'northcorp.modules.project.set_project_status'
 }
-
-doc_events = {}
