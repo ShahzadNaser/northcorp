@@ -115,10 +115,12 @@ def calculate_project_wise_allocation(self):
         if(total_hours):
             temp_list = []
             for row in project_wise_time:
+                per = round((row.get("working_hours")/total_hours)*100,2)
                 temp_list.append({
                     "project": row.get("project"),
                     "project_name": frappe.db.get_value("Project",row.get("project"),"project_name"),
                     "total_hours": row.get("working_hours"),
-                    "percentage": round((row.get("working_hours")/total_hours)*100,2)
+                    "percentage": per,
+                    "amount": (per * self.rounded_total)/100                
                 })
             self.set("project_wise_allocation",temp_list)
