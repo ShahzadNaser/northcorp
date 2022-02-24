@@ -3,7 +3,6 @@
 
 import frappe
 from frappe.utils import getdate, formatdate
-import re
 
 def override_methods():
     from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
@@ -14,6 +13,7 @@ def before_validate(self, method):
 
 def before_save(self, method):
     override_methods()
+    calculate_project_wise_allocation(self)
 
 def before_submit(self, method):
     override_methods()
@@ -88,5 +88,37 @@ def calculate_overtime(self):
                 AND working_hours > 1
                 AND attendance_date BETWEEN %s AND %s
                 AND employee = %s    
-    ''', (self.start_date, self.end_date, self.employee), as_dict=True,debug=True)
+    ''', (self.start_date, self.end_date, self.employee), as_dict=True)
     self.overtimehours = overtime[0].get("overtimehours") or 0
+
+def calculate_project_wise_allocation(self):
+    project_wise_time = frappe.db.sql('''
+        SELECT 
+            att_time.project as project,
+            SUM(att_time.working_hours) as working_hours
+        FROM
+            `tabAttendance` att
+        LEFT JOIN 
+            `tabAttendance Time` att_time
+            ON
+                att_time.parent = att.name
+        WHERE
+            att.status = 'Present' AND att.docstatus = 1
+                AND att.working_hours > 1
+                AND att.attendance_date BETWEEN %s AND %s
+                AND att.employee = %s    
+        GROUP BY
+            att_time.project
+    ''', (self.start_date, self.end_date, self.employee), as_dict=True)
+    if(project_wise_time):
+        total_hours = sum(d.get('working_hours', 0) for d in project_wise_time)
+        if(total_hours):
+            temp_list = []
+            for row in project_wise_time:
+                temp_list.append({
+                    "project": row.get("project"),
+                    "project_name": frappe.db.get_value("Project",row.get("project"),"project_name"),
+                    "total_hours": row.get("working_hours"),
+                    "percentage": round((row.get("working_hours")/total_hours)*100,2)
+                })
+            self.set("project_wise_allocation",temp_list)
