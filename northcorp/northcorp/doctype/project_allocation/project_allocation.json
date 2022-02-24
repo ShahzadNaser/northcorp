@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "creation": "2022-02-24 22:41:03.638092",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "project",
+  "project_name",
+  "total_hours",
+  "percentage"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "project.project_name",
+   "fieldname": "project_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Project Name",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_hours",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Hours",
+   "non_negative": 1,
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Percentage",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-02-24 22:41:03.638092",
+ "modified_by": "Administrator",
+ "module": "northcorp",
+ "name": "Project Allocation",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
