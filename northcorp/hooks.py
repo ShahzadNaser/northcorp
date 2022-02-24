@@ -90,6 +90,14 @@ app_license = "MIT"
 # Hook on document methods and events
 
 doc_events = {
+	"Salary Slip":{
+		"before_save" :  "northcorp.modules.salary_slip.before_save",
+		"before_submit" :  "northcorp.modules.salary_slip.before_submit",
+		"before_validate": "northcorp.modules.salary_slip.before_validate"
+	},
+   	"Salary Structure Assignment":{
+		"before_save" :  "northcorp.modules.salary_structure_assignment.before_save"
+	},
 	"Attendance":{
 		"before_submit":"northcorp.modules.attendance.before_submit",
 	}
