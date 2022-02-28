@@ -104,7 +104,7 @@ def calculate_project_wise_allocation(self):
                 att_time.parent = att.name
         WHERE
             att.status = 'Present' AND att.docstatus = 1
-                AND att.working_hours > 1
+                AND att.working_hours > 0
                 AND att.attendance_date BETWEEN %s AND %s
                 AND att.employee = %s    
         GROUP BY
