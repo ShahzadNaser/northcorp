@@ -121,6 +121,6 @@ def calculate_project_wise_allocation(self):
                     "project_name": frappe.db.get_value("Project",row.get("project"),"project_name"),
                     "total_hours": row.get("working_hours"),
                     "percentage": per,
-                    "amount": (per * self.rounded_total)/100                
+                    "amount": (per * (self.rounded_total - self.total_loan_repayment))/100                
                 })
             self.set("project_wise_allocation",temp_list)
