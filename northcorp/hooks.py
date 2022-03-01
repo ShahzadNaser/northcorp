@@ -82,7 +82,8 @@ app_license = "MIT"
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Payroll Entry": "northcorp.modules.payroll_entry.CustomPayrollEntry"
+	"Payroll Entry": "northcorp.modules.payroll_entry.CustomPayrollEntry",
+	"Salary Slip": "northcorp.modules.salary_slip.CustomSalarySlip"
 }
 
 # Document Events
@@ -92,8 +93,7 @@ override_doctype_class = {
 doc_events = {
 	"Salary Slip":{
 		"before_save" :  "northcorp.modules.salary_slip.before_save",
-		"before_submit" :  "northcorp.modules.salary_slip.before_submit",
-		"before_validate": "northcorp.modules.salary_slip.before_validate"
+		"before_submit" :  "northcorp.modules.salary_slip.before_submit"
 	},
    	"Salary Structure Assignment":{
 		"before_save" :  "northcorp.modules.salary_structure_assignment.before_save"
