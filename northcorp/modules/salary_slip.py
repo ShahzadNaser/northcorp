@@ -2,80 +2,81 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import getdate, formatdate
+from frappe.utils import getdate, formatdate, flt
+from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
-def override_methods():
-    from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
-    SalarySlip.get_data_for_eval = get_data_for_eval
+# def override_methods():
+#     SalarySlip.get_data_for_eval = get_data_for_eval
 
-def before_validate(self, method):
-    override_methods()
+# def before_validate(self, method):
+#     override_methods()
 
 def before_save(self, method):
-    override_methods()
+    # override_methods()
     calculate_project_wise_allocation(self)
 
 def before_submit(self, method):
-    override_methods()
+    if not self.project_wise_allocation:
+        frappe.throw("Project Wise Allocation must required.")
+class CustomSalarySlip(SalarySlip):
+    def get_data_for_eval(self):
+        '''Returns data for evaluating formula'''
+        # customization add cache for performance improvement
+        #key = "temp_{0}".format(self.employee)
+        #val = frappe.cache().get_value(key)
+        #if val: return val
+        data = frappe._dict()
+        employee = frappe.get_doc("Employee", self.employee).as_dict()
 
-def get_data_for_eval(self):
-    '''Returns data for evaluating formula'''
-    # customization add cache for performance improvement
-    #key = "temp_{0}".format(self.employee)
-    #val = frappe.cache().get_value(key)
-    #if val: return val
-
-    data = frappe._dict()
-    employee = frappe.get_doc("Employee", self.employee).as_dict()
-
-    start_date = getdate(self.start_date)
-    date_to_validate = (
-        employee.date_of_joining
-        if employee.date_of_joining > start_date
-        else start_date
-    )
-
-    salary_structure_assignment = frappe.get_value(
-        "Salary Structure Assignment",
-        {
-            "employee": self.employee,
-            "salary_structure": self.salary_structure,
-            "from_date": ("<=", date_to_validate),
-            "docstatus": 1,
-        },
-        "*",
-        order_by="from_date desc",
-        as_dict=True,
-    )
-
-    if not salary_structure_assignment:
-        frappe.throw(
-            _("Please assign a Salary Structure for Employee {0} "
-            "applicable from or before {1} first").format(
-                frappe.bold(self.employee_name),
-                frappe.bold(formatdate(date_to_validate)),
-            )
+        start_date = getdate(self.start_date)
+        date_to_validate = (
+            employee.date_of_joining
+            if employee.date_of_joining > start_date
+            else start_date
         )
 
-    data.update(salary_structure_assignment)
-    data.update(employee)
-    data.update(self.as_dict())
-    self.hourly_rate = salary_structure_assignment.get("hourly_rate")
+        salary_structure_assignment = frappe.get_value(
+            "Salary Structure Assignment",
+            {
+                "employee": self.employee,
+                "salary_structure": self.salary_structure,
+                "from_date": ("<=", date_to_validate),
+                "docstatus": 1,
+            },
+            "*",
+            order_by="from_date desc",
+            as_dict=True,
+        )
+        if not salary_structure_assignment:
+            frappe.throw(
+                _("Please assign a Salary Structure for Employee {0} "
+                "applicable from or before {1} first").format(
+                    frappe.bold(self.employee_name),
+                    frappe.bold(formatdate(date_to_validate)),
+                )
+            )
 
-    calculate_overtime(self)
+        emp_salary_details = get_emp_salary_components(salary_structure_assignment.get("name"))
 
-    # set values for components
-    salary_components = frappe.get_all("Salary Component", fields=["salary_component_abbr"])
-    for sc in salary_components:
-        data.setdefault(sc.salary_component_abbr, 0)
+        data.update(salary_structure_assignment)
+        data.update(employee)
+        data.update(self.as_dict())
+        self.hourly_rate = salary_structure_assignment.get("hourly_rate")
 
-    for key in ('earnings', 'deductions'):
-        for d in self.get(key):
-            data[d.abbr] = d.amount
+        calculate_overtime(self)
 
-    # customization add data in cache for performance imporvement
-    #frappe.cache().set_value(key, data, expires_in_sec=100)
-    return data
+        # set values for components
+        salary_components = frappe.get_all("Salary Component", fields=["salary_component_abbr"])
+        for sc in salary_components:
+            data.setdefault(sc.salary_component_abbr, emp_salary_details.get(sc.salary_component_abbr) or 0)
+
+        for key in ('earnings', 'deductions'):
+            for d in self.get(key):
+                data[d.abbr] = d.amount
+
+        # customization add data in cache for performance imporvement
+        #frappe.cache().set_value(key, data, expires_in_sec=100)
+        return data
 
 def calculate_overtime(self):
     overtime = frappe.db.sql('''
@@ -115,12 +116,35 @@ def calculate_project_wise_allocation(self):
         if(total_hours):
             temp_list = []
             for row in project_wise_time:
-                per = round((row.get("working_hours")/total_hours)*100,2)
+                per = round((flt(row.get("working_hours"))/flt(total_hours))*100,2)
                 temp_list.append({
                     "project": row.get("project"),
                     "project_name": frappe.db.get_value("Project",row.get("project"),"project_name"),
                     "total_hours": row.get("working_hours"),
                     "percentage": per,
-                    "amount": (per * (self.rounded_total - self.total_loan_repayment))/100                
+                    "amount": flt((per * (flt(self.rounded_total) + flt(self.total_loan_repayment)))/100)            
                 })
             self.set("project_wise_allocation",temp_list)
+    else:
+        default_project = frappe.db.get_value("Company",self.company,"default_project")
+        if default_project:
+            self.set("project_wise_allocation",[{
+                    "project": default_project,
+                    "project_name": frappe.db.get_value("Project",default_project,"project_name"),
+                    "total_hours": 0,
+                    "percentage": 100,
+                    "amount": flt(flt(self.rounded_total) + flt(self.total_loan_repayment))               
+                }])
+        
+
+def get_emp_salary_components(salary_structure_assignment):
+    if not salary_structure_assignment:
+        return {}
+
+    esc =  frappe.db.get_list("Employee Salary Components", filters={"parent": salary_structure_assignment}, fields=["salary_component","abbr","amount"])
+    emp_salary_details = {}
+    for row in esc:
+        if row.get("amount"):
+            emp_salary_details[row.get("abbr")] = row.get("amount")
+
+    return emp_salary_details
