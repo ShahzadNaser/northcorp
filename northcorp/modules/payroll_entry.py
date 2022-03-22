@@ -109,7 +109,6 @@ def get_project_wise_breakdown(pe=None):
                 LEFT JOIN
             `tabDepartment` dep ON ss.department = dep.name
         WHERE
-            ss.docstatus = 1
-                AND ss.payroll_entry = %s
+            ss.payroll_entry = %s
         GROUP BY ss.department, al.project
     """,(pe),as_dict=True,debug=True)           
