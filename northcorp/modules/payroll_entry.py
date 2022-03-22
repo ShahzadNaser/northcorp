@@ -44,7 +44,9 @@ class CustomPayrollEntry(PayrollEntry):
                     "debit_in_account_currency": flt(amt, precision),
                     "exchange_rate": flt(exchange_rate),
                     "cost_center": row.payroll_cost_center or self.cost_center,
-                    "project": row.project
+                    "project": row.project,
+                    "reference_type":"Payroll Entry",
+                    "reference_name":self.name
                 }, accounting_dimensions))
 
             # Deductions
@@ -65,7 +67,9 @@ class CustomPayrollEntry(PayrollEntry):
                 "account": payroll_payable_account,
                 "credit_in_account_currency": flt(payable_amt, precision),
                 "exchange_rate": flt(exchange_rate),
-                "cost_center": self.cost_center
+                "cost_center": self.cost_center,
+                "reference_type":"Payroll Entry",
+                "reference_name":self.name
             }, accounting_dimensions))
 
             journal_entry.set("accounts", accounts)
@@ -96,7 +100,7 @@ def get_project_wise_breakdown(pe=None):
             ss.department,
             dep.payroll_cost_center,
             al.project,
-            proj.default_payroll_account,
+            dep.default_payroll_account,
             SUM(al.amount) AS amount
         FROM
             `tabSalary Slip` ss
@@ -104,8 +108,6 @@ def get_project_wise_breakdown(pe=None):
             `tabProject Allocation` al ON al.parent = ss.name
                 LEFT JOIN
             `tabDepartment` dep ON ss.department = dep.name
-                LEFT JOIN
-            `tabProject` proj ON al.project = proj.name
         WHERE
             ss.docstatus = 1
                 AND ss.payroll_entry = %s
