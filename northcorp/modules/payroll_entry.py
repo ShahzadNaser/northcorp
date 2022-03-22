@@ -37,17 +37,18 @@ class CustomPayrollEntry(PayrollEntry):
 
             # Earnings
             for row in earnings:
-                exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(row.default_payroll_account, row.amount, company_currency, currencies)
-                payable_amount += flt(row.amount, precision)
-                accounts.append(self.update_accounting_dimensions({
-                    "account": row.default_payroll_account,
-                    "debit_in_account_currency": flt(amt, precision),
-                    "exchange_rate": flt(exchange_rate),
-                    "cost_center": row.payroll_cost_center or self.cost_center,
-                    "project": row.project,
-                    "reference_type":"Payroll Entry",
-                    "reference_name":self.name
-                }, accounting_dimensions))
+                if row.amount > 0:
+                    exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(row.default_payroll_account, row.amount, company_currency, currencies)
+                    payable_amount += flt(row.amount, precision)
+                    accounts.append(self.update_accounting_dimensions({
+                        "account": row.default_payroll_account,
+                        "debit_in_account_currency": flt(amt, precision),
+                        "exchange_rate": flt(exchange_rate),
+                        "cost_center": row.payroll_cost_center or self.cost_center,
+                        "project": row.project,
+                        "reference_type":"Payroll Entry",
+                        "reference_name":self.name
+                    }, accounting_dimensions))
 
             # Deductions
             # for acc_cc, amount in deductions.items():
