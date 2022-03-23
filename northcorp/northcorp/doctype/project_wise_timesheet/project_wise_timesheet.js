@@ -55,6 +55,13 @@ frappe.ui.form.on('Employee Timesheet', {
 			frappe.model.set_value(cdt, cdn, "working_hours",hours);
 			refresh_field("employees");
 		}
+	},
+	attendance_date: function(frm, cdt, cdn) {
+		let d = locals[cdt][cdn];
+		if(d.attendance_date){
+			frappe.model.set_value(cdt, cdn, "day",moment(d.attendance_date).format('dddd'));
+			refresh_field("employees");
+		}
 	}
 });
 

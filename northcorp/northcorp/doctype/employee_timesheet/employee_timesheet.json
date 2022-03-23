@@ -9,6 +9,7 @@
   "employee_name",
   "project",
   "attendance_date",
+  "day",
   "column_break_4",
   "start_time",
   "end_time",
@@ -16,7 +17,7 @@
  ],
  "fields": [
   {
-   "columns": 2,
+   "columns": 3,
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -74,15 +75,22 @@
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Read Only",
-   "in_list_view": 1,
    "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "day",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Day",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-03-01 21:33:21.030475",
+ "modified": "2022-03-23 18:28:11.456285",
  "modified_by": "Administrator",
  "module": "northcorp",
  "name": "Employee Timesheet",

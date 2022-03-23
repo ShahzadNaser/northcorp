@@ -37,7 +37,7 @@ class ProjectWiseTimesheet(Document):
 
 		for d in employees:
 			for single_date in daterange(frappe.utils.getdate(self.start_date), frappe.utils.getdate(self.end_date)):
-				self.append('employees', {"employee":d.employee,"attendance_date":frappe.utils.getdate(single_date),"project":self.default_project or '',"start_time": '',"end_time":''})
+				self.append('employees', {"employee":d.employee,"attendance_date":frappe.utils.getdate(single_date),"day":frappe.utils.get_weekday(frappe.utils.get_datetime(single_date)),"project":self.default_project or '',"start_time": '',"end_time":''})
 
 		self.number_of_employees = len(self.employees)
 
