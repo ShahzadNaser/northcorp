@@ -83,7 +83,8 @@ app_license = "MIT"
 
 override_doctype_class = {
 	"Payroll Entry": "northcorp.modules.payroll_entry.CustomPayrollEntry",
-	"Salary Slip": "northcorp.modules.salary_slip.CustomSalarySlip"
+	"Salary Slip": "northcorp.modules.salary_slip.CustomSalarySlip",
+	"Loan Repayment": "northcorp.modules.loan_repayment.CustomLoanRepayment" 
 }
 
 # Document Events
