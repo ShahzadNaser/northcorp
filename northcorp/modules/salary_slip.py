@@ -78,6 +78,20 @@ class CustomSalarySlip(SalarySlip):
         #frappe.cache().set_value(key, data, expires_in_sec=100)
         return data
 
+    def make_loan_repayment_entry(self):
+        from erpnext.loan_management.doctype.loan_repayment.loan_repayment import create_repayment_entry
+        for loan in self.loans:
+            repayment_entry = create_repayment_entry(loan.loan, self.employee,
+                self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
+                loan.principal_amount, loan.total_payment)
+
+            repayment_entry.payroll_entry = self.get("payroll_entry")
+            repayment_entry.save()
+            repayment_entry.submit()
+
+            frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
+
+
 def calculate_overtime(self):
     overtime = frappe.db.sql('''
         SELECT 
