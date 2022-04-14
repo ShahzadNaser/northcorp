@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe import _
 from frappe.utils import getdate, formatdate, flt
 from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
