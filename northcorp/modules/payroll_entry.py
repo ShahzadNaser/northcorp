@@ -135,7 +135,7 @@ class CustomPayrollEntry(PayrollEntry):
                 )
             )
 
-        for row in frappe.db.sql(""" SELECT ss.employee,ss.gratuity_amount, dep.payroll_cost_center, emp.gratuity_account,gratuity_payable_account FROM `tabSalary Slip` ss INNER JOIN `tabDepartment` dep on ss.department = dep.name LEFT JOIN `tabEmployee` emp ON ss.employee = emp.name WHERE ss.payroll_entry = '{}'""".format(self.name),as_dict=True):
+        for row in frappe.db.sql(""" SELECT ss.employee,ss.gratuity_amount, dep.payroll_cost_center, emp.gratuity_account,emp.gratuity_payable_account FROM `tabSalary Slip` ss INNER JOIN `tabDepartment` dep on ss.department = dep.name LEFT JOIN `tabEmployee` emp ON ss.employee = emp.name WHERE ss.payroll_entry = '{}'""".format(self.name),as_dict=True):
             if row.get("gratuity_amount"):
                 accounts.append(
                     self.update_accounting_dimensions(

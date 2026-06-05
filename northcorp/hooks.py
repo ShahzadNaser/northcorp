@@ -14,7 +14,7 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/northcorp/css/northcorp.css"
-# app_include_js = "/assets/northcorp/js/northcorp.js"
+app_include_js = "/assets/northcorp/js/northcorp.js?1.0.1"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/northcorp/css/northcorp.css"
@@ -84,7 +84,9 @@ app_license = "MIT"
 override_doctype_class = {
 	"Payroll Entry": "northcorp.modules.payroll_entry.CustomPayrollEntry",
 	"Salary Slip": "northcorp.modules.salary_slip.CustomSalarySlip",
-	"Loan Repayment": "northcorp.modules.loan_repayment.CustomLoanRepayment" 
+	"Loan Repayment": "northcorp.modules.loan_repayment.CustomLoanRepayment",
+	"Expense Claim": "northcorp.modules.expense_claim.CustomExpenseClaim",
+	"Email Digest": "northcorp.modules.email_digest.CustomEmailDigest",
 }
 
 # Document Events
