@@ -6,6 +6,13 @@ from frappe import _
 from frappe.utils import getdate, formatdate, flt, date_diff, cint
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
+try:
+    # hrms >= 16.5x moved this from a SalarySlip method to a module-level util
+    from hrms.payroll.utils import get_component_abbr_map
+except ImportError:
+    get_component_abbr_map = None
+
+
 def before_save(self, method):
     # override_methods()
     calculate_project_wise_allocation(self)
@@ -24,20 +31,10 @@ class CustomSalarySlip(SalarySlip):
         data.update(self.as_dict())
         data.update(employee)
 
-        data.update(self.get_component_abbr_map())
+        data.update(self.get_component_abbr_zero_map())
 
-        salary_structure_assignment = frappe.get_value(
-            "Salary Structure Assignment",
-            {
-                "employee": self.employee,
-                "salary_structure": self.salary_structure,
-                "from_date": ("<=", self.actual_start_date),
-                "docstatus": 1,
-            },
-            "*",
-            order_by="from_date desc",
-            as_dict=True,
-        )
+        # same record set_salary_structure_assignment() already fetched (it throws if none exists)
+        salary_structure_assignment = self._salary_structure_assignment
         emp_salary_details = get_emp_salary_components(salary_structure_assignment.get("name"))
 
         self.hourly_rate = salary_structure_assignment.get("hourly_rate")
@@ -62,6 +59,12 @@ class CustomSalarySlip(SalarySlip):
             default_data[sc.salary_component_abbr] = emp_salary_details.get(sc.salary_component_abbr) or 0
 
         return data, default_data
+
+    def get_component_abbr_zero_map(self):
+        """{salary_component_abbr: 0} for every component, across hrms versions."""
+        if get_component_abbr_map:
+            return get_component_abbr_map()
+        return super().get_component_abbr_map()
 
 
     def make_loan_repayment_entry(self):
