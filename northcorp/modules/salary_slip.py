@@ -66,19 +66,17 @@ class CustomSalarySlip(SalarySlip):
             return get_component_abbr_map()
         return super().get_component_abbr_map()
 
+    def _set_evaluated_components(self):
+        """hrms >= 16.5x takes each row's default_amount from the Salary Structure Assignment's
+        period-independent evaluation, which never sees the per-employee components, overtime
+        or gratuity set up in get_data_for_eval(). Paid amounts are prorated from default_amount,
+        so flag every row for re-evaluation: add_structure_component() then computes
+        default_amount against this slip's default_data, as hrms < 16.5x did."""
+        super()._set_evaluated_components()
 
-    def make_loan_repayment_entry(self):
-        from erpnext.loan_management.doctype.loan_repayment.loan_repayment import create_repayment_entry
-        for loan in self.loans:
-            repayment_entry = create_repayment_entry(loan.loan, self.employee,
-                self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
-                loan.principal_amount, loan.total_payment)
-
-            repayment_entry.payroll_entry = self.get("payroll_entry")
-            repayment_entry.save()
-            repayment_entry.submit()
-
-            frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
+        for rows in self._evaluated_components.values():
+            for row in rows:
+                row.condition_met = False
 
 
 def calculate_overtime(self):
