@@ -105,6 +105,9 @@ class CustomEmailDigest(EmailDigest):
         account = "Customer Retentions - NRC" if self.get("company") == "NORTHCORP LLC" else "Customer Retentions - NRI"
         return self.get_type_balance("custom_retentions", "Receivable", root_type=None, account=account)
 
+    def get_invoiced_amount(self):
+        account = "Debtors - NRC" if self.get("company") == "NORTHCORP LLC" else "Debtors - NRI"
+        return self.get_type_balance("invoiced_amount", "Receivable", account=account)
 
     def get_type_balance(self, fieldname, account_type, root_type=None, account=None):
 
@@ -113,7 +116,6 @@ class CustomEmailDigest(EmailDigest):
         if account:
             temp_filters["name"] = account
 
-        frappe.log_error(temp_filters, "====temp_filters====") 
         if root_type:
             temp_filters["root_type"] = root_type
             accounts = [

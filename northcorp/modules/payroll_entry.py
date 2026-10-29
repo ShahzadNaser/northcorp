@@ -186,8 +186,6 @@ class CustomPayrollEntry(PayrollEntry):
                     "credit_in_account_currency": flt(payable_amt, precision),
                     "exchange_rate"             : flt(exchange_rate),
                     "cost_center"               : self.cost_center,
-                    "reference_type"            : "Payroll Entry",
-                    "reference_name"            : self.name,
                     "party_type"                : "Supplier",
                     "party"                     : "SUP-0771",
                 },

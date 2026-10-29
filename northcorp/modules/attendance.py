@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import flt
+from hrms.utils.holiday_list import get_assigned_holiday_list
 
 def before_submit(doc, method):
     calculate_overtime(doc)
@@ -18,7 +19,15 @@ def calculate_overtime(doc):
     att_date = frappe.utils.getdate(doc.attendance_date)
     att_day = att_date.strftime('%A')
 
-    holiday_list = frappe.db.get_value("Employee",doc.employee,'holiday_list')
+    if doc.employee:
+        holiday_list = get_assigned_holiday_list(doc.employee)
+        if not holiday_list:
+            holiday_list = frappe.db.get_value("Employee",doc.employee,'holiday_list')
+
+    if not holiday_list:
+        company = frappe.db.get_value("Employee", doc.employee, "company") 
+        holiday_list = frappe.get_cached_value("Company", company, "default_holiday_list")
+
     holidays = frappe.get_doc("Holiday List",holiday_list)
     for day in holidays.holidays:
         frappe.errprint(day.holiday_date)
