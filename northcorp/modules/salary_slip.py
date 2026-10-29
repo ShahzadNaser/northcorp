@@ -27,20 +27,22 @@ class CustomSalarySlip(SalarySlip):
         if not hasattr(self, "_salary_structure_assignment"):
             self.set_salary_structure_assignment()
 
+        # same record set_salary_structure_assignment() already fetched (it throws if none exists)
+        salary_structure_assignment = self._salary_structure_assignment
+        emp_salary_details = get_emp_salary_components(salary_structure_assignment.get("name"))
+
+        # set before self.as_dict() below so formulas see this slip's values on the first pass
+        self.hourly_rate = salary_structure_assignment.get("hourly_rate")
+        if is_overtime_enabled(self.employee):
+            calculate_overtime(self)
+        else:
+            self.overtimehours = 0
+
         data.update(self._salary_structure_assignment)
         data.update(self.as_dict())
         data.update(employee)
 
         data.update(self.get_component_abbr_zero_map())
-
-        # same record set_salary_structure_assignment() already fetched (it throws if none exists)
-        salary_structure_assignment = self._salary_structure_assignment
-        emp_salary_details = get_emp_salary_components(salary_structure_assignment.get("name"))
-
-        self.hourly_rate = salary_structure_assignment.get("hourly_rate")
-
-        if data.get("enable_overtime"):
-            calculate_overtime(self)
 
         if not data.get("disable_gratuity") and not self.get("gratuity_amount"):
             self.gratuity_amount = calculate_total_gratuity(self.get("employee"), data.get("gratuity_account"), data.get("base"), data.get("date_of_joining"), self.get("end_date"))
@@ -77,6 +79,11 @@ class CustomSalarySlip(SalarySlip):
         for rows in self._evaluated_components.values():
             for row in rows:
                 row.condition_met = False
+
+
+def is_overtime_enabled(employee):
+    """Overtime is paid only to employees with Enable Overtime checked on their profile."""
+    return bool(frappe.get_cached_value("Employee", employee, "enable_overtime"))
 
 
 def calculate_overtime(self):
