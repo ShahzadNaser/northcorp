@@ -3,10 +3,23 @@
 
 import frappe
 from frappe.utils import flt
-from hrms.utils.holiday_list import get_assigned_holiday_list
+from hrms.utils.holiday_list import get_holiday_list_for_employee
 
 def before_submit(doc, method):
     calculate_overtime(doc)
+
+
+def get_attendance_holiday_list(doc):
+    """Holiday list in effect on the attendance date (hrms assigns them by date)."""
+    holiday_list = get_holiday_list_for_employee(
+        doc.employee, raise_exception=False, as_on=doc.attendance_date
+    )
+    if not holiday_list:
+        # legacy fields from before Holiday List Assignment
+        holiday_list = frappe.db.get_value("Employee", doc.employee, "holiday_list") or frappe.get_cached_value(
+            "Company", doc.company, "default_holiday_list"
+        )
+    return holiday_list
 
 def calculate_overtime(doc):
     """Customization calculate overtime according to requirements"""
@@ -19,21 +32,11 @@ def calculate_overtime(doc):
     att_date = frappe.utils.getdate(doc.attendance_date)
     att_day = att_date.strftime('%A')
 
-    if doc.employee:
-        holiday_list = get_assigned_holiday_list(doc.employee)
-        if not holiday_list:
-            holiday_list = frappe.db.get_value("Employee",doc.employee,'holiday_list')
-
-    if not holiday_list:
-        company = frappe.db.get_value("Employee", doc.employee, "company") 
-        holiday_list = frappe.get_cached_value("Company", company, "default_holiday_list")
-
-    holidays = frappe.get_doc("Holiday List",holiday_list)
-    for day in holidays.holidays:
-        frappe.errprint(day.holiday_date)
-        if frappe.utils.getdate(day.holiday_date) == frappe.utils.getdate(doc.attendance_date):
-            att_day = 'Sunday'
-            break
+    holiday_list = get_attendance_holiday_list(doc)
+    if holiday_list and frappe.db.exists(
+        "Holiday", {"parent": holiday_list, "parenttype": "Holiday List", "holiday_date": att_date}
+    ):
+        att_day = 'Sunday'
 
     
     if doc.working_hours:

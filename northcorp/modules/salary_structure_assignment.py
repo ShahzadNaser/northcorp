@@ -3,6 +3,22 @@
 
 import frappe
 from frappe.utils import flt
+from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+    SalaryStructureAssignment,
+)
+
+
+class CustomSalaryStructureAssignment(SalaryStructureAssignment):
+    def _get_component_eval_context(self):
+        """hrms >= 16.5x evaluates structure formulas on the assignment itself (slip defaults,
+        CTC / gross). Expose this employee's own component amounts there, the same way
+        CustomSalarySlip.get_data_for_eval() does for the slip."""
+        data = super()._get_component_eval_context()
+        for row in self.get("employee_salary_components"):
+            if row.abbr and flt(row.amount):
+                data[row.abbr] = flt(row.amount)
+        return data
+
 
 def before_save(doc, method):
     if doc.base:

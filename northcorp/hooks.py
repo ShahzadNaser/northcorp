@@ -84,7 +84,7 @@ app_include_js = "/assets/northcorp/js/northcorp.js?1.0.1"
 override_doctype_class = {
 	"Payroll Entry": "northcorp.modules.payroll_entry.CustomPayrollEntry",
 	"Salary Slip": "northcorp.modules.salary_slip.CustomSalarySlip",
-	"Loan Repayment": "northcorp.modules.loan_repayment.CustomLoanRepayment",
+	"Salary Structure Assignment": "northcorp.modules.salary_structure_assignment.CustomSalaryStructureAssignment",
 	"Expense Claim": "northcorp.modules.expense_claim.CustomExpenseClaim",
 	"Email Digest": "northcorp.modules.email_digest.CustomEmailDigest",
 }
