@@ -19,6 +19,9 @@ frappe.query_reports["Items Below Safety Stock"] = {
 		if (column.fieldname === "requested_qty" && data && data.requested_qty > 0) {
 			value = "<span style='color:#1f6f43'><b>" + value + "</b></span>";
 		}
+		if (column.fieldname === "ordered_qty" && data && data.ordered_qty > 0) {
+			value = "<span style='color:#1f5fa8'><b>" + value + "</b></span>";
+		}
 		return value;
 	},
 };
