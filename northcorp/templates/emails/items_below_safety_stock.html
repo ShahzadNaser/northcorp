@@ -1,0 +1,29 @@
+{%- set td = "border:1px solid #d0d7e2;padding:6px 8px;font-size:13px;vertical-align:top;" -%}
+{%- set th = "border:1px solid #1f3864;padding:6px 8px;font-size:12px;" -%}
+<!--[if mso]><table width="900" cellspacing="0" cellpadding="0" align="center"><tr><td><![endif]-->
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#222;max-width:960px;width:100%;margin:0 auto;background:#ffffff">
+<table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse"><tr>
+<td style="background:#1f3864;color:#fff;padding:12px 14px;font-size:16px;font-weight:bold">NORTHCORP &middot; Items Below Safety Stock</td>
+<td style="background:#1f3864;padding:12px 14px;text-align:right"><span style="background:#dae3f3;color:#1f3864;font-size:11px;font-weight:bold;padding:3px 9px;border-radius:10px;white-space:nowrap">{{ short }}</span></td>
+</tr></table>
+<p style="margin:14px 0 6px">Dear <b>{{ names }}</b>,</p>
+<p style="margin:0 0 12px">These items of <b>{{ company }}</b> are below their safety stock as of {{ today }}. Please review and arrange purchase requests where needed.</p>
+<table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:separate;border-spacing:6px 0;margin:0 0 14px;table-layout:fixed"><tr>
+<td style="background:#fdecea;border:1px solid #f5c2c0;padding:10px 8px;text-align:center"><span style="font-size:24px;font-weight:bold;color:#c62828">{{ rows|length }}</span><br><span style="font-size:11px;color:#666">items below safety stock</span></td>
+<td style="background:#f3f6fb;border:1px solid #d0d7e2;padding:10px 8px;text-align:center"><span style="font-size:24px;font-weight:bold;color:#1f3864">{{ zero }}</span><br><span style="font-size:11px;color:#666">out of stock (0)</span></td>
+<td style="background:#eaf5ee;border:1px solid #bfe0cb;padding:10px 8px;text-align:center"><span style="font-size:24px;font-weight:bold;color:#1f6f43">{{ requested }}</span><br><span style="font-size:11px;color:#666">already requested (MR)</span></td>
+<td style="background:#f3f6fb;border:1px solid #d0d7e2;padding:10px 8px;text-align:center"><span style="font-size:24px;font-weight:bold;color:#1f3864">{{ groups }}</span><br><span style="font-size:11px;color:#666">item groups</span></td>
+</tr></table>
+<table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;table-layout:fixed;word-wrap:break-word">
+<colgroup><col style="width:40%"><col style="width:16%"><col style="width:13%"><col style="width:15%"><col style="width:16%"></colgroup>
+<tr style="background:#1f3864;color:#fff"><th style="{{ th }}text-align:left">Item</th><th style="{{ th }}text-align:right">Stock / Safety</th><th style="{{ th }}text-align:right">Shortage</th><th style="{{ th }}text-align:right">Requested (MR)</th><th style="{{ th }}text-align:right">Suggested order</th></tr>
+{%- for r in rows %}
+<tr style="{{ 'background:#f7f9fc' if loop.index is even else '' }}"><td style="{{ td }}"><b>{{ r.item_code }}</b><br><span style="font-size:12px">{{ r.item_name }}</span><br><span style="font-size:11px;color:#666">{{ r.item_group }}</span></td><td style="{{ td }}text-align:right">{{ "%g"|format(r.actual_qty) }} / {{ "%g"|format(r.safety_stock) }}<br><span style="font-size:11px;color:#666">{{ r.uom }}</span></td><td style="{{ td }}text-align:right;color:#c62828"><b>{{ "%g"|format(r.shortage) }}</b></td><td style="{{ td }}text-align:right;{{ 'color:#1f6f43' if r.requested_qty else 'color:#999' }}">{% if r.requested_qty %}<b>{{ "%g"|format(r.requested_qty) }}</b>{% else %}&ndash;{% endif %}</td><td style="{{ td }}text-align:right"><b>{{ "%g"|format(r.suggested_order) }}</b></td></tr>
+{%- endfor %}
+</table>
+<table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:16px 0 8px"><tr>
+<td><a href="{{ report_url }}" style="display:block;text-align:center;background:#1f3864;color:#fff;padding:13px 6px;text-decoration:none;border-radius:4px;font-size:14px;font-weight:bold"><span style="font-size:18px">&#8599;</span><br>Open the full report in ERPNext</a></td>
+</tr></table>
+<p style="margin:0;font-size:10px;color:#888">Requested (MR) = quantity on submitted Material Requests not yet converted to a Purchase Order. The full list is attached as a CSV file (opens in Excel). Automated weekly email from ERPNext, every Monday at 8:00 AM.</p>
+</div>
+<!--[if mso]></td></tr></table><![endif]-->
