@@ -108,6 +108,15 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
+scheduler_events = {
+	"cron": {
+		# Monday 08:00 - Items Below Safety Stock weekly email (replaces the Server Script of the same name)
+		"0 8 * * 1": [
+			"northcorp.tasks.send_items_below_safety_stock_email",
+		],
+	},
+}
+
 # scheduler_events = {
 # 	"all": [
 # 		"northcorp.tasks.all"
