@@ -191,24 +191,28 @@ user_data_fields = [
 # ]
 
 
-doctypes_list = ["Purchase Order", "Purchase Order Item", "Supplier", "Project", "Request for Quotation"]
-
+# Everything customised in the ERPNext UI is exported here so GitHub holds the full system.
+# On the server: bench --site <site> export-fixtures --app northcorp  (writes northcorp/fixtures/*.json)
+# bench migrate imports these files back and OVERWRITES UI edits of the same records,
+# so from now on change these through GitHub (or export right after a UI edit).
+# User-saved Report Builder / Custom Report views and Auto Email Reports stay in the database.
 fixtures = [
-    {"doctype": "Client Script", "filters": [
-        [
-            "dt", "in", doctypes_list
-        ]
+    "Custom Field",
+    "Property Setter",
+    "Client Script",
+    {"doctype": "Server Script", "filters": [["name", "not like", "%TEST%"]]},
+    "Workflow",
+    "Workflow State",
+    "Workflow Action Master",
+    {"doctype": "Notification", "filters": [["is_standard", "=", 0]]},
+    {"doctype": "Print Format", "filters": [["standard", "=", "No"]]},
+    {"doctype": "Report", "filters": [
+        ["is_standard", "=", "No"],
+        ["report_type", "in", ["Script Report", "Query Report"]],
     ]},
-    {"doctype": "Property Setter", "filters": [
-        [
-            "doc_type", "in", doctypes_list
-        ]
-    ]},
-    {"doctype": "Custom Field", "filters": [
-        [
-            "dt", "in", doctypes_list
-        ]
-    ]}
+    "Email Template",
+    "Letter Head",
+    {"doctype": "DocType", "filters": [["custom", "=", 1]]},
 ]
 
 # from erpnext.payroll.doctype.salary_slip.salary_slip import SalarySlip
