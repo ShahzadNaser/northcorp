@@ -4,3 +4,4 @@
 *.swp
 tags
 northcorp/docs/current
+workspace-backup-*.json
