@@ -105,6 +105,11 @@ doc_events = {
 	}
 }
 
+# Include expense_claim_party_details in the Expense Claim outstanding amount used by
+# Payment Entry and Journal Entry (see northcorp.modules.expense_claim)
+before_request = ["northcorp.modules.expense_claim.apply_outstanding_amount_patch"]
+before_job = ["northcorp.modules.expense_claim.apply_outstanding_amount_patch"]
+
 # Scheduled Tasks
 # ---------------
 

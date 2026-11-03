@@ -4,6 +4,8 @@ import frappe
 from frappe import _
 from frappe.utils import getdate,flt
 from hrms.hr.doctype.expense_claim.expense_claim import ExpenseClaim
+import hrms.hr.doctype.expense_claim.expense_claim as hrms_expense_claim
+import hrms.overrides.employee_payment_entry as hrms_employee_payment_entry
 from erpnext.accounts.general_ledger import make_gl_entries
 
 
@@ -82,3 +84,31 @@ class CustomExpenseClaim(ExpenseClaim):
                 )
 
             make_gl_entries(gl_entries, cancel)
+
+
+def get_outstanding_amount_for_claim(claim):
+    # hrms works this out as total_sanctioned_amount + total_taxes_and_charges, which leaves out
+    # expense_claim_party_details. grand_total (see calculate_taxes) includes them, is net of
+    # advances and is the amount booked to the payable account, so pay against that instead.
+    precision = frappe.get_precision("Expense Claim", "grand_total")
+
+    if isinstance(claim, str) or claim.get("grand_total") is None:
+        claim = frappe.db.get_value(
+            "Expense Claim",
+            claim if isinstance(claim, str) else claim.name,
+            ["grand_total", "total_amount_reimbursed"],
+            as_dict=True,
+        )
+
+    return flt(flt(claim.grand_total) - flt(claim.total_amount_reimbursed), precision)
+
+
+def apply_outstanding_amount_patch():
+    # run from before_request / before_job (hooks.py) so it is in place even when no Expense Claim
+    # has been loaded yet, e.g. the Journal Entry check. employee_payment_entry imports the
+    # function by name, so it has to be replaced there as well.
+    hrms_expense_claim.get_outstanding_amount_for_claim = get_outstanding_amount_for_claim
+    hrms_employee_payment_entry.get_outstanding_amount_for_claim = get_outstanding_amount_for_claim
+
+
+apply_outstanding_amount_patch()
