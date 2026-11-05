@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 # Items Below Safety Stock - stock items whose stock per company is below the item's safety stock.
-# Moved from the UI Script Report of the same name; adds Requested Qty (open Material Requests).
+# Moved from the UI Script Report of the same name; adds Requested Qty (open Material Requests)
+# and On Order Qty (open Purchase Orders).
 
 import frappe
 from frappe import _
@@ -24,6 +25,7 @@ def get_columns() -> list[dict]:
 		{"label": _("Safety Stock"), "fieldname": "safety_stock", "fieldtype": "Float", "width": 100},
 		{"label": _("Shortage"), "fieldname": "shortage", "fieldtype": "Float", "width": 100},
 		{"label": _("Requested Qty (MR)"), "fieldname": "requested_qty", "fieldtype": "Float", "width": 130},
+		{"label": _("On Order Qty (PO)"), "fieldname": "ordered_qty", "fieldtype": "Float", "width": 130},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 100},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 100},
 		{"label": _("Suggested Order"), "fieldname": "suggested_order", "fieldtype": "Float", "width": 120},
@@ -33,6 +35,7 @@ def get_columns() -> list[dict]:
 def get_data(filters: dict) -> list[dict]:
 	# requested_qty = Bin.indented_qty: qty on submitted Material Requests not yet converted to a
 	# Purchase Order (ERPNext keeps it per warehouse; stopped/closed/cancelled MRs are excluded).
+	# ordered_qty = Bin.ordered_qty: qty on submitted Purchase Orders not yet received.
 	return frappe.db.sql(
 		"""
 		SELECT
@@ -45,6 +48,7 @@ def get_data(filters: dict) -> list[dict]:
 			i.safety_stock AS safety_stock,
 			i.safety_stock - IFNULL(s.actual_qty, 0) AS shortage,
 			IFNULL(s.requested_qty, 0) AS requested_qty,
+			IFNULL(s.ordered_qty, 0) AS ordered_qty,
 			IFNULL(r.reorder_level, 0) AS reorder_level,
 			IFNULL(r.reorder_qty, 0) AS reorder_qty,
 			GREATEST(i.safety_stock - IFNULL(s.actual_qty, 0),
@@ -54,7 +58,8 @@ def get_data(filters: dict) -> list[dict]:
 		LEFT JOIN (
 			SELECT b.item_code, w.company,
 				SUM(b.actual_qty) AS actual_qty,
-				SUM(b.indented_qty) AS requested_qty
+				SUM(b.indented_qty) AS requested_qty,
+				SUM(b.ordered_qty) AS ordered_qty
 			FROM `tabBin` b
 			JOIN `tabWarehouse` w ON w.name = b.warehouse
 			GROUP BY b.item_code, w.company

@@ -7,7 +7,7 @@ from frappe.utils import formatdate, get_url, nowdate
 # Items Below Safety Stock - Weekly Email (cron "0 8 * * 1" = Monday 08:00, see hooks.py)
 # One email per company with the items that company stocks which are below safety stock (+ CSV attachment).
 # Only items that had stock in that company at some point in the last STOCK_DAYS days are included.
-# Moved from the Server Script "Items Below Safety Stock - Weekly Email"; adds Requested (MR) qty.
+# Moved from the Server Script "Items Below Safety Stock - Weekly Email"; adds Requested (MR) and On Order (PO) qty.
 SAFETY_STOCK_RECIPIENTS = {
 	"NORTHCORP INDUSTRY LLC": [
 		"radheshyam@northcorp.ae",
@@ -26,6 +26,7 @@ SAFETY_STOCK_RECIPIENTS = {
 STOCK_DAYS = 365
 
 # requested_qty = Bin.indented_qty: qty on submitted Material Requests not yet converted to a Purchase Order.
+# ordered_qty = Bin.ordered_qty: qty on submitted Purchase Orders not yet received.
 SAFETY_STOCK_SQL = """
 	SELECT
 		i.item_group AS item_group,
@@ -36,12 +37,14 @@ SAFETY_STOCK_SQL = """
 		i.safety_stock AS safety_stock,
 		i.safety_stock - IFNULL(s.actual_qty, 0) AS shortage,
 		IFNULL(s.requested_qty, 0) AS requested_qty,
+		IFNULL(s.ordered_qty, 0) AS ordered_qty,
 		IFNULL(r.reorder_level, 0) AS reorder_level,
 		IFNULL(r.reorder_qty, 0) AS reorder_qty,
 		GREATEST(i.safety_stock - IFNULL(s.actual_qty, 0), IFNULL(r.reorder_qty, 0)) AS suggested_order
 	FROM `tabItem` i
 	LEFT JOIN (
-		SELECT b.item_code, SUM(b.actual_qty) AS actual_qty, SUM(b.indented_qty) AS requested_qty
+		SELECT b.item_code, SUM(b.actual_qty) AS actual_qty, SUM(b.indented_qty) AS requested_qty,
+			SUM(b.ordered_qty) AS ordered_qty
 		FROM `tabBin` b
 		JOIN `tabWarehouse` w ON w.name = b.warehouse
 		WHERE w.company = %(company)s
@@ -84,6 +87,7 @@ CSV_FIELDS = [
 	("Safety Stock", "safety_stock"),
 	("Shortage", "shortage"),
 	("Requested Qty (MR)", "requested_qty"),
+	("On Order Qty (PO)", "ordered_qty"),
 	("Reorder Level", "reorder_level"),
 	("Reorder Qty", "reorder_qty"),
 	("Suggested Order", "suggested_order"),
@@ -119,6 +123,7 @@ def send_items_below_safety_stock_email(test_to=None):
 				"today": today,
 				"zero": len([r for r in rows if not r.actual_qty]),
 				"requested": len([r for r in rows if r.requested_qty]),
+				"ordered": len([r for r in rows if r.ordered_qty]),
 				"groups": len({r.item_group for r in rows}),
 				"report_url": get_url("/app/query-report/Items Below Safety Stock")
 				+ "?company="
