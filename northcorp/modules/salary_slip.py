@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import getdate, formatdate, flt, date_diff, cint
+from frappe.utils import getdate, formatdate, flt, date_diff, cint, escape_html
 from hrms.payroll.doctype.salary_slip.salary_slip import SalarySlip
 
 try:
@@ -79,6 +79,90 @@ class CustomSalarySlip(SalarySlip):
         for rows in self._evaluated_components.values():
             for row in rows:
                 row.condition_met = False
+
+    def email_salary_slip(self):
+        """Based on hrms' email_salary_slip, with these differences:
+        - the recipient comes from get_salary_slip_recipient()
+        - the PDF is always encrypted with get_salary_slip_password(), whatever Payroll Settings
+          says, and is not sent at all if there is no password
+        - the email explains how to open the PDF
+        Compare with the hrms method when upgrading hrms, as changes there won't apply here."""
+        receiver = get_salary_slip_recipient(self.employee)
+        if not receiver:
+            frappe.msgprint(_("{0}: Employee email not found, hence email not sent").format(self.employee_name))
+            return
+
+        password = get_salary_slip_password(self.employee)
+        if not password:
+            frappe.msgprint(_("{0}: Date of Birth not found, hence email not sent").format(self.employee_name))
+            return
+
+        payroll_settings = frappe.get_single("Payroll Settings")
+
+        subject = f"Salary Slip - from {self.start_date} to {self.end_date}"
+        message = get_salary_slip_greeting(self)
+        if payroll_settings.email_template:
+            email_template = frappe.get_doc("Email Template", payroll_settings.email_template)
+            context = self.as_dict()
+            subject = frappe.render_template(email_template.subject, context)
+            message = frappe.render_template(email_template.response, context)
+        message += get_salary_slip_password_instructions()
+
+        posting_date = getdate(self.posting_date)
+        email_args = {
+            "sender": payroll_settings.sender_email,
+            "recipients": [receiver],
+            "message": message,
+            "subject": subject,
+            "attachments": [
+                frappe.attach_print(self.doctype, self.name, file_name=self.name, password=password)
+            ],
+            "reference_doctype": self.doctype,
+            "reference_name": self.name,
+            "send_after": posting_date if posting_date > getdate() else None,
+        }
+        if not frappe.flags.in_test:
+            frappe.enqueue(method=frappe.sendmail, queue="short", timeout=300, is_async=True, **email_args)
+        else:
+            frappe.sendmail(**email_args)
+
+
+def get_salary_slip_password(employee):
+    """The employee's date of birth as DDMMYYYY, e.g. 5 March 1990 is 05031990."""
+    date_of_birth = frappe.db.get_value("Employee", employee, "date_of_birth")
+    return getdate(date_of_birth).strftime("%d%m%Y") if date_of_birth else None
+
+
+def get_salary_slip_greeting(slip):
+    return "<p>{0}</p><p>{1}</p>".format(
+        _("Dear {0},").format(escape_html(slip.employee_name)),
+        _("Your salary slip for {0} to {1} is attached.").format(
+            formatdate(slip.start_date), formatdate(slip.end_date)
+        ),
+    )
+
+
+def get_salary_slip_password_instructions():
+    """Describes the password format only, so the email itself never contains the password."""
+    return "<p><b>{0}</b></p><ol><li>{1}</li><li>{2}</li><li>{3}</li></ol><p>{4}</p><p>{5}</p>".format(
+        _("How to open your salary slip"),
+        _("Open the attached PDF file."),
+        _("When asked for a password, enter your date of birth as DDMMYYYY, using numbers only."),
+        _("For example, if you were born on 5 March 1990, enter 05031990."),
+        _("Please keep this document private."),
+        _("If you cannot open the file, please contact HR. This is an automated email, so please do not reply."),
+    )
+
+
+def get_salary_slip_recipient(employee):
+    """Salary slips go to the employee's Personal Email, falling back to Preferred Email.
+
+    Preferred Email stays the work address: leave, stock entry and asset movement
+    notifications all send to it."""
+    emails = frappe.db.get_value("Employee", employee, ["personal_email", "prefered_email"], as_dict=True)
+    if not emails:
+        return None
+    return emails.get("personal_email") or emails.get("prefered_email")
 
 
 def is_overtime_enabled(employee):
