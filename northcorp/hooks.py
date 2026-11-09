@@ -102,6 +102,10 @@ doc_events = {
 	},
 	"Attendance":{
 		"before_submit":"northcorp.modules.attendance.before_submit",
+	},
+	# Auto Purchase Receipt for PO-linked service items once the invoice is fully approved
+	"Purchase Invoice":{
+		"on_update_after_submit":"northcorp.modules.purchase_invoice.on_update_after_submit",
 	}
 }
 
