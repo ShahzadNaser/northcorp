@@ -6,6 +6,8 @@ from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purc
 # Final state of "Purchase Invoices Workflow" / "Purchase Receipt Workflow"
 PI_FINAL_STATE = "Submitted"
 PR_FINAL_STATE = "Submitted"
+# Marks receipts made by this module; used to find them again on invoice cancel
+AUTO_REMARK = "Auto-created from Purchase Invoice {0}"
 
 
 def on_update_after_submit(doc, method=None):
@@ -49,6 +51,61 @@ def on_update_after_submit(doc, method=None):
 		alert=True,
 		indicator="green",
 	)
+
+
+def before_cancel(doc, method=None):
+	"""Cancel the Purchase Receipt(s) auto-created from this invoice.
+
+	Runs before the invoice is cancelled so Frappe's linked-document check doesn't
+	block the cancellation. Receipts made by hand from the invoice are not touched;
+	they still block the cancellation in the standard way. If a receipt can't be
+	cancelled (e.g. a Landed Cost Voucher points to it), the invoice cancellation
+	stops with that error and nothing is cancelled.
+	"""
+	for name in get_auto_receipts(doc.name):
+		pr = frappe.get_doc("Purchase Receipt", name)
+		pr.flags.ignore_permissions = True
+		pr.cancel()
+		set_cancelled_workflow_state(pr)
+		pr.add_comment(
+			"Info", _("Cancelled automatically with Purchase Invoice {0}").format(doc.name)
+		)
+		frappe.msgprint(
+			_("Purchase Receipt {0} cancelled with this invoice.").format(frappe.bold(name)),
+			alert=True,
+			indicator="orange",
+		)
+
+
+def get_auto_receipts(invoice):
+	parents = frappe.get_all(
+		"Purchase Receipt Item",
+		filters={"purchase_invoice": invoice, "docstatus": 1},
+		pluck="parent",
+		distinct=True,
+	)
+	if not parents:
+		return []
+	return frappe.get_all(
+		"Purchase Receipt",
+		filters={
+			"name": ["in", parents],
+			"docstatus": 1,
+			"remarks": ["like", AUTO_REMARK.format(invoice) + "%"],
+		},
+		pluck="name",
+	)
+
+
+def set_cancelled_workflow_state(pr):
+	if not pr.meta.get_workflow():
+		return
+	workflow = frappe.get_doc("Workflow", pr.meta.get_workflow())
+	states = [s.state for s in workflow.states if str(s.doc_status) == "2"]
+	if not states or pr.get(workflow.workflow_state_field) in states:
+		return
+	state = "Cancelled" if "Cancelled" in states else states[0]
+	pr.db_set(workflow.workflow_state_field, state, update_modified=False)
 
 
 def get_service_items(doc):
@@ -99,7 +156,7 @@ def build_purchase_receipt(doc, service_items):
 	pr.set("items", final)
 	pr.posting_date = doc.posting_date
 	pr.set_posting_time = 1
-	pr.remarks = _("Auto-created from Purchase Invoice {0} (service items)").format(doc.name)
+	pr.remarks = AUTO_REMARK.format(doc.name) + " (service items)"
 	return pr
 
 
