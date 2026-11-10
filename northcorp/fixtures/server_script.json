@@ -1,0 +1,21 @@
+[
+ {
+  "allow_guest": 0,
+  "api_method": null,
+  "cron_format": null,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Server Script",
+  "doctype_event": "Before Save",
+  "enable_rate_limit": 0,
+  "event_frequency": "All",
+  "modified": "2026-11-10 12:00:00.000000",
+  "module": null,
+  "name": "Bank Transaction - Normalise Signs",
+  "rate_limit_count": 5,
+  "rate_limit_seconds": 86400,
+  "reference_doctype": "Bank Transaction",
+  "script": "# Bank statements (CSV/Excel import) can show money out as a negative number.\n# ERPNext does not reject negative deposit/withdrawal, so normalise them here.\n# MT940 imports are already converted correctly by ERPNext.\nflt = frappe.utils.flt\n\nif doc.docstatus < 2:\n    # Bank shows money out as a negative number - store it as a positive withdrawal\n    if flt(doc.withdrawal) < 0:\n        doc.withdrawal = abs(flt(doc.withdrawal))\n\n    # A negative deposit is really money going out\n    if flt(doc.deposit) < 0:\n        doc.withdrawal = flt(doc.withdrawal) + abs(flt(doc.deposit))\n        doc.deposit = 0\n\n    # A bank line is either money in or money out, never both\n    if flt(doc.deposit) > 0 and flt(doc.withdrawal) > 0:\n        frappe.throw(\"A bank transaction can't have both a deposit and a withdrawal. Please check this statement line.\")\n",
+  "script_type": "DocType Event"
+ }
+]
