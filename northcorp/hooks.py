@@ -77,6 +77,20 @@ app_include_js = "/assets/northcorp/js/northcorp.js?1.0.1"
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
+# Insurance Policy: project teams only see policies linked to a project (Finance sees all)
+permission_query_conditions = {
+	"Insurance Policy": "northcorp.modules.insurance.policy_query_conditions",
+}
+
+has_permission = {
+	"Insurance Policy": "northcorp.modules.insurance.policy_has_permission",
+}
+
+# Insurance records on the Project's Connections tab
+override_doctype_dashboards = {
+	"Project": "northcorp.modules.insurance.project_dashboard",
+}
+
 # DocType Class
 # ---------------
 # Override standard doctype classes
@@ -124,6 +138,10 @@ scheduler_events = {
 		# Monday 08:00 - Items Below Safety Stock weekly email (replaces the Server Script of the same name)
 		"0 8 * * 1": [
 			"northcorp.tasks.send_items_below_safety_stock_email",
+		],
+		# Daily 07:30 - insurance expiry / premium / extension / subcontractor certificate alerts
+		"30 7 * * *": [
+			"northcorp.modules.insurance.send_insurance_alerts",
 		],
 	},
 }
