@@ -12,11 +12,14 @@ AUTO_REMARK = "Auto-created from Purchase Invoice {0}"
 
 def on_update_after_submit(doc, method=None):
 	"""When a Purchase Invoice reaches its final workflow state, create and submit a
-	Purchase Receipt for its PO-linked service lines (non-stock, non-asset items).
+	Purchase Receipt for its PO-linked service lines (non-stock, non-asset items),
+	but only for PO lines that are now 100% billed.
 
+	- Progress bills (30%, 50%, ...) create no receipt. The bill that takes a PO
+	  line to 100% billed receives everything still open on that line.
 	- Same item names and descriptions as the invoice lines.
-	- Only the balance still open on each PO line is received, so receipts already
-	  made against the PO (full or partial) are taken into account.
+	- Receipts already made against the PO (full or partial) are taken into
+	  account, so only the open balance is received.
 	- At most one auto receipt per invoice.
 	"""
 	if doc.get("workflow_state") != PI_FINAL_STATE or not doc.has_value_changed("workflow_state"):
@@ -128,16 +131,21 @@ def build_purchase_receipt(doc, service_items):
 	rows = [d for d in pr.items if d.item_code in service_items and d.purchase_order]
 	default_wh = next((d.warehouse for d in rows if d.warehouse), None)
 
-	po_balance = get_po_balance([d.purchase_order_item for d in rows if d.purchase_order_item])
+	po_balance = get_fully_billed_po_balance(
+		[d.purchase_order_item for d in rows if d.purchase_order_item]
+	)
 
 	final = []
 	for d in rows:
+		# Missing key = PO line not yet 100% billed (progress bill): no receipt.
 		balance = po_balance.get(d.purchase_order_item, 0)
 		if balance <= 0:
-			continue  # PO line already fully received
+			continue  # not fully billed yet, or already fully received
 
-		qty = min(flt(d.qty), balance)
-		po_balance[d.purchase_order_item] = balance - qty
+		# The bill that completes the PO line receives everything still open on it,
+		# including what earlier progress bills covered.
+		qty = balance
+		po_balance[d.purchase_order_item] = 0
 
 		src = pi_rows.get(d.purchase_invoice_item)
 		if src:
@@ -160,15 +168,23 @@ def build_purchase_receipt(doc, service_items):
 	return pr
 
 
-def get_po_balance(po_detail_names):
-	"""Open qty per PO line. received_qty counts every submitted receipt against the PO."""
+def get_fully_billed_po_balance(po_detail_names):
+	"""Open qty for each PO line that is 100% billed.
+
+	billed_amt already includes this invoice, because the invoice was submitted
+	(docstatus 1) at an earlier workflow step. received_qty counts every submitted
+	receipt against the PO. PO lines not yet fully billed are left out.
+	"""
 	if not po_detail_names:
 		return {}
-	return {
-		r.name: flt(r.qty) - flt(r.received_qty)
-		for r in frappe.get_all(
-			"Purchase Order Item",
-			filters={"name": ["in", list(set(po_detail_names))]},
-			fields=["name", "qty", "received_qty"],
-		)
-	}
+	out = {}
+	for r in frappe.get_all(
+		"Purchase Order Item",
+		filters={"name": ["in", list(set(po_detail_names))]},
+		fields=["name", "qty", "received_qty", "amount", "billed_amt"],
+	):
+		amount = flt(r.amount, 2)
+		if amount <= 0 or flt(r.billed_amt, 2) < amount:
+			continue  # progress bill: PO line not 100% billed yet
+		out[r.name] = flt(r.qty) - flt(r.received_qty)
+	return out
