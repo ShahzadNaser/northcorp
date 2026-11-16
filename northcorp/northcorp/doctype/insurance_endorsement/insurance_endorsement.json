@@ -1,0 +1,38 @@
+{
+ "actions": [],
+ "creation": "2026-11-12 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "endorsement_type", "endorsement_no", "effective_date", "new_expiry", "new_sum_insured",
+  "column_break_premium", "additional_premium", "vat", "debit_note_no", "purchase_invoice",
+  "details_section", "conditions", "attachment"
+ ],
+ "fields": [
+  {"columns": 2, "fieldname": "endorsement_type", "fieldtype": "Select", "in_list_view": 1, "label": "Endorsement Type", "options": "Extension of Period\nIncrease in Sum Insured\nDecrease in Sum Insured\nName Change\nCancellation\nOther", "reqd": 1},
+  {"columns": 2, "fieldname": "endorsement_no", "fieldtype": "Data", "in_list_view": 1, "label": "Endorsement No"},
+  {"columns": 1, "fieldname": "effective_date", "fieldtype": "Date", "in_list_view": 1, "label": "Effective Date", "reqd": 1},
+  {"columns": 1, "depends_on": "eval:doc.endorsement_type=='Extension of Period'", "fieldname": "new_expiry", "fieldtype": "Date", "in_list_view": 1, "label": "New Expiry", "mandatory_depends_on": "eval:doc.endorsement_type=='Extension of Period'"},
+  {"depends_on": "eval:in_list(['Increase in Sum Insured','Decrease in Sum Insured'], doc.endorsement_type)", "fieldname": "new_sum_insured", "fieldtype": "Currency", "label": "New Sum Insured", "mandatory_depends_on": "eval:in_list(['Increase in Sum Insured','Decrease in Sum Insured'], doc.endorsement_type)"},
+  {"fieldname": "column_break_premium", "fieldtype": "Column Break"},
+  {"columns": 1, "fieldname": "additional_premium", "fieldtype": "Currency", "in_list_view": 1, "label": "Additional Premium"},
+  {"fieldname": "vat", "fieldtype": "Currency", "label": "VAT"},
+  {"fieldname": "debit_note_no", "fieldtype": "Data", "label": "Insurer Debit Note / Tax Invoice No"},
+  {"fieldname": "purchase_invoice", "fieldtype": "Link", "label": "Purchase Invoice", "options": "Purchase Invoice"},
+  {"fieldname": "details_section", "fieldtype": "Section Break"},
+  {"fieldname": "conditions", "fieldtype": "Small Text", "label": "Conditions (e.g. subject to no known loss)"},
+  {"fieldname": "attachment", "fieldtype": "Attach", "label": "Endorsement Document"}
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-12 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "northcorp",
+ "name": "Insurance Endorsement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

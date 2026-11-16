@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "autoname": "SUB-INS-.YY.-.#####",
+ "creation": "2026-11-12 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "subcontractor", "subcontractor_name", "project", "project_name", "status",
+  "column_break_header", "insurance_type", "insurer", "policy_no", "valid_from", "valid_to", "limit_amount", "currency",
+  "details_section", "northcorp_named", "waiver_in_favour", "attachment", "remarks"
+ ],
+ "fields": [
+  {"fieldname": "subcontractor", "fieldtype": "Link", "in_list_view": 1, "in_standard_filter": 1, "label": "Subcontractor", "options": "Supplier", "reqd": 1},
+  {"fetch_from": "subcontractor.supplier_name", "fieldname": "subcontractor_name", "fieldtype": "Data", "label": "Subcontractor Name", "read_only": 1},
+  {"fieldname": "project", "fieldtype": "Link", "in_list_view": 1, "in_standard_filter": 1, "label": "Project", "options": "Project"},
+  {"fetch_from": "project.project_name", "fieldname": "project_name", "fieldtype": "Data", "label": "Project Name", "read_only": 1},
+  {"fieldname": "status", "fieldtype": "Select", "in_list_view": 1, "in_standard_filter": 1, "label": "Status", "no_copy": 1, "options": "Valid\nExpiring Soon\nExpired", "read_only": 1},
+  {"fieldname": "column_break_header", "fieldtype": "Column Break"},
+  {"fieldname": "insurance_type", "fieldtype": "Select", "in_list_view": 1, "in_standard_filter": 1, "label": "Insurance Type", "options": "Workmen Compensation\nPublic Liability Insurance\nMotor Insurance\nContractors All Risk\nMedical Insurance\nProperty/Fire Insurance\nMarine Insurance", "reqd": 1},
+  {"fieldname": "insurer", "fieldtype": "Data", "label": "Insurer"},
+  {"fieldname": "policy_no", "fieldtype": "Data", "label": "Policy No", "reqd": 1},
+  {"fieldname": "valid_from", "fieldtype": "Date", "label": "Valid From", "reqd": 1},
+  {"fieldname": "valid_to", "fieldtype": "Date", "in_list_view": 1, "label": "Valid To", "reqd": 1},
+  {"fieldname": "limit_amount", "fieldtype": "Currency", "label": "Limit / Sum Insured", "options": "currency"},
+  {"default": "AED", "fieldname": "currency", "fieldtype": "Link", "label": "Currency", "options": "Currency"},
+  {"fieldname": "details_section", "fieldtype": "Section Break"},
+  {"default": "0", "fieldname": "northcorp_named", "fieldtype": "Check", "label": "Northcorp named as additional insured"},
+  {"default": "0", "fieldname": "waiver_in_favour", "fieldtype": "Check", "label": "Waiver of subrogation in Northcorp's favour"},
+  {"fieldname": "attachment", "fieldtype": "Attach", "label": "Certificate", "reqd": 1},
+  {"fieldname": "remarks", "fieldtype": "Small Text", "label": "Remarks"}
+ ],
+ "links": [],
+ "modified": "2026-11-12 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "northcorp",
+ "name": "Subcontractor Insurance Certificate",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1},
+  {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "Accounts Manager", "share": 1, "write": 1},
+  {"create": 1, "print": 1, "read": 1, "report": 1, "role": "Accounts User", "write": 1},
+  {"create": 1, "print": 1, "read": 1, "report": 1, "role": "Projects Manager", "write": 1},
+  {"create": 1, "print": 1, "read": 1, "report": 1, "role": "Projects User", "write": 1}
+ ],
+ "search_fields": "subcontractor,project,policy_no",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "subcontractor_name",
+ "track_changes": 1
+}

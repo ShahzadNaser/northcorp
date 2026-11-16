@@ -1,0 +1,26 @@
+{
+ "actions": [],
+ "creation": "2026-11-12 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": ["risk_no", "location", "warehouse", "item_description", "sum_insured"],
+ "fields": [
+  {"columns": 1, "fieldname": "risk_no", "fieldtype": "Data", "in_list_view": 1, "label": "Risk No"},
+  {"columns": 3, "fieldname": "location", "fieldtype": "Data", "in_list_view": 1, "label": "Location", "reqd": 1},
+  {"columns": 2, "fieldname": "warehouse", "fieldtype": "Link", "in_list_view": 1, "label": "Warehouse", "options": "Warehouse"},
+  {"columns": 2, "fieldname": "item_description", "fieldtype": "Data", "in_list_view": 1, "label": "Insured Item", "reqd": 1},
+  {"columns": 2, "fieldname": "sum_insured", "fieldtype": "Currency", "in_list_view": 1, "label": "Sum Insured", "reqd": 1}
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-12 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "northcorp",
+ "name": "Insurance Risk Location",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
