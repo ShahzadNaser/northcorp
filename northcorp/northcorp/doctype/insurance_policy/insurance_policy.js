@@ -22,7 +22,8 @@ frappe.ui.form.on("Insurance Policy", {
 
 		if (open) {
 			frm.add_custom_button(__("Confirm Policy Check"), () => {
-				frm.save().then(() => call("confirm_check")).then((r) => {
+				// frm.save() never resolves when there are no changes, so only save a dirty form.
+				(frm.is_dirty() ? frm.save() : Promise.resolve()).then(() => call("confirm_check")).then((r) => {
 					const issues = (r && r.message) || [];
 					if (issues.length) {
 						frappe.msgprint({ title: __("Policy Check Failed"), indicator: "red",
