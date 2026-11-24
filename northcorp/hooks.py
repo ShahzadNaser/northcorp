@@ -120,6 +120,8 @@ doc_events = {
 	# Auto Purchase Receipt for PO-linked service items once the invoice is fully approved,
 	# and cancelled again with the invoice
 	"Purchase Invoice":{
+		# Fill "Recoverable Standard Rated Expenses" from the invoice's input VAT (UAE VAT 201 Box 9)
+		"validate":"northcorp.modules.purchase_invoice.validate",
 		"on_update_after_submit":"northcorp.modules.purchase_invoice.on_update_after_submit",
 		"before_cancel":"northcorp.modules.purchase_invoice.before_cancel",
 	}
