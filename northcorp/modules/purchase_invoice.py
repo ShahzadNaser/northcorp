@@ -8,6 +8,54 @@ PI_FINAL_STATE = "Submitted"
 PR_FINAL_STATE = "Submitted"
 # Marks receipts made by this module; used to find them again on invoice cancel
 AUTO_REMARK = "Auto-created from Purchase Invoice {0}"
+# UAE VAT 201 Box 9 reads this field
+RECOVERABLE_VAT_FIELD = "recoverable_standard_rated_expenses"
+
+
+def validate(doc, method=None):
+	set_recoverable_vat(doc)
+
+
+def set_recoverable_vat(doc):
+	"""Fill "Recoverable Standard Rated Expenses (AED)" from the input VAT on the invoice,
+	so the UAE VAT 201 report (Box 9) matches the VAT in the ledger.
+
+	- No input VAT on the invoice: set to 0.
+	- Field empty: set to the input VAT.
+	- Field still equal to the VAT of the last save (filled automatically, or typed
+	  the same): follow the new VAT when taxes change.
+	- Any other value was typed on purpose (e.g. part of the VAT is not recoverable)
+	  and is kept.
+	"""
+	if not doc.meta.has_field(RECOVERABLE_VAT_FIELD):
+		return
+
+	vat = get_input_vat(doc)
+	current = flt(doc.get(RECOVERABLE_VAT_FIELD), 2)
+
+	if not vat or not current:
+		doc.set(RECOVERABLE_VAT_FIELD, vat)
+		return
+
+	previous = doc.get_doc_before_save()
+	if previous and abs(flt(previous.get(RECOVERABLE_VAT_FIELD), 2) - get_input_vat(previous)) < 0.01:
+		doc.set(RECOVERABLE_VAT_FIELD, vat)
+
+
+def is_input_vat_account(account):
+	# e.g. "VAT 5% Purchase - NRC"; reverse charge VAT goes to Box 10, not Box 9
+	return bool(account) and "VAT" in account and "Purchase" in account and "RCM" not in account
+
+
+def get_input_vat(doc):
+	"""Input VAT on the invoice in company currency (negative on debit notes)."""
+	vat = 0.0
+	for tax in doc.get("taxes") or []:
+		if not is_input_vat_account(tax.account_head):
+			continue
+		amount = flt(tax.base_tax_amount_after_discount_amount)
+		vat += -amount if tax.add_deduct_tax == "Deduct" else amount
+	return flt(vat, 2)
 
 
 def on_update_after_submit(doc, method=None):
