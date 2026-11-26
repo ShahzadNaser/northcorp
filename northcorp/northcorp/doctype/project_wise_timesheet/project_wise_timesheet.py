@@ -16,7 +16,7 @@ class ProjectWiseTimesheet(Document):
                 frappe.utils.nowdate()))
 
         # self.validate_duplicate_date_rows()
-    def on_trash():
+    def on_trash(self):
         pass
 
     def validate_duplicate_date_rows(self):
